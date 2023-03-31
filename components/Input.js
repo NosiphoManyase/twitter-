@@ -30,7 +30,7 @@ export default function Input() {
         const imageRef = ref(storage, `post/${docRef.id}/image`)
 
         if(selectedFile){
-            await uploadString(imageRef, 'data_url').then(async() => {
+            await uploadString(imageRef, selectedFile, 'data_url').then(async() => {
                 const downloadURL = await getDownloadURL(imageRef)
                 await updateDoc(doc(db, 'posts', docRef.id),{
                     image: downloadURL,
@@ -75,7 +75,7 @@ export default function Input() {
             </div>
             {selectedFile &&(
                  <div className='relative'>
-                    <XMarkIcon onClick={() => setSelectedFile(null)} className='h-7 text-black absolute cursor-pointer shadow-md shadow-white rounded-full'/>
+                    <XMarkIcon onClick={() => setSelectedFile(null)} className='h-7 text-black absolute cursor-pointer shadow-md rounded-full border border-white m-1'/>
                     <img src={selectedFile} alt='image uploaded' className={`${loading && 'animate-pulse'}`}/>
                  </div>
             )}
