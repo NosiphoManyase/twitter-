@@ -8,25 +8,27 @@ import { useEffect, useState } from 'react'
 import { deleteObject, ref } from 'firebase/storage'
 import { useRecoilState } from 'recoil'
 import { modalState, postIdState } from '../atom/modalAtom'
+import { useRouter } from 'next/router'
 
-export default function Post({ post}) {
+export default function Post({ post, id}) {
     const {data: session} = useSession()
     const [likes, setLikes] = useState([])
     const [comments, setComments] = useState([])
     const [hasLiked, setHasLiked] = useState(false)
     const [open, setOpen] = useRecoilState(modalState)
     const [postId, setPostId] = useRecoilState(postIdState)
+    const router = useRouter()
 
     useEffect(() => {
         const unsubscribe = onSnapshot(
-            collection(db, 'posts', post.id, 'likes'),
+            collection(db, 'posts', id, 'likes'),
             snapshot => setLikes(snapshot.docs)
         )
     }, [db])
 
     useEffect(() => {
         const unsubscribe = onSnapshot(
-            collection(db, 'posts', post.id, 'comments'),
+            collection(db, 'posts', id, 'comments'),
             snapshot => setComments(snapshot.docs)
         )
     }, [db])
@@ -38,9 +40,9 @@ export default function Post({ post}) {
     const likePost = async () => {
         if(session){
             if(hasLiked){
-                await deleteDoc(doc(db, 'posts', post.id, 'likes', session?.user.uid ))
+                await deleteDoc(doc(db, 'posts', id, 'likes', session?.user.uid ))
             }else {
-                await setDoc(doc(db, 'posts', post.id, 'likes', session?.user.uid), {
+                await setDoc(doc(db, 'posts', id, 'likes', session?.user.uid), {
                     username: session?.user.username
                 })
             }
@@ -52,11 +54,11 @@ export default function Post({ post}) {
 
     const deletePost = async () => {
         if(window.confirm('Are you sure you want to delete this post?')){
-            deleteDoc(doc(db, 'posts', post.id))
-            if(post.data().image){
-                deleteObject(ref(storage, `post/${post.id}/image`))
+            deleteDoc(doc(db, 'posts', id))
+            if(post?.data()?.image){
+                deleteObject(ref(storage, `post/${id}/image`))
             }
-            
+            router.push('/')
         }
         
     }
@@ -64,25 +66,25 @@ export default function Post({ post}) {
   return (
     <div className='flex p-3 cursor-pointer border-b border-gray-200'>
 
-        <img src={post.data().userImg} alt='user image'
+        <img src={post?.data()?.userImg} alt='user image'
         className='h-11 w-11 object-cover object-center rounded-full mr-4 '/>
 
         {/* Post header */}
         <div className='flex-1'>
             <div className='flex items-center justify-between'>
                 <div className='flex items-center space-x-1 whitespace-nowrap'>
-                    <h4 className='font-bold text-[15px] sm:text-[16px] hover:underline'>{post.data().name}</h4>
-                    <span className='text-sm sm:text-[15px]'>@{post.data().username} - </span>
+                    <h4 className='font-bold text-[15px] sm:text-[16px] hover:underline'>{post?.data()?.name}</h4>
+                    <span className='text-sm sm:text-[15px]'>@{post?.data()?.username} - </span>
                     <span className='text-sm sm:text-[15px] hover:underline'>
-                        <Moment date={post?.data().timestamp?.toDate()} fromNow />
+                        <Moment date={post?.data()?.timestamp?.toDate()} fromNow />
                     </span>
                 </div>
                 <EllipsisHorizontalIcon className='h-10 hoverEffect w-10 hover:bg-sky-100 hover:text-sky-500 p-2' />
             </div>
 
-            <div className='text-gray-800 text-[15px] sm:text-[16px] mb-2'>{post.data().text}</div>
+            <div className='text-gray-800 text-[15px] sm:text-[16px] mb-2'>{post?.data()?.text}</div>
 
-            <img src={post.data().image}
+            <img src={post?.data()?.image}
                 alt='' 
                 className='rounded-2xl mr-2'
             />
@@ -94,7 +96,7 @@ export default function Post({ post}) {
                         if(!session){
                             signIn()
                         }else {
-                            setPostId(post.id)
+                            setPostId(id)
                             setOpen(!open)
                         }
                     }} 
@@ -105,7 +107,7 @@ export default function Post({ post}) {
                 )}
                 
                 </div>
-                {session?.user.uid === post?.data().id && (
+                {session?.user.uid === post?.data()?.id && (
                     <TrashIcon onClick={deletePost} className='h-9 w-9 hoverEffect p-2 hover:text-red-600 hover:bg-red-100' />
                 )}
                 
