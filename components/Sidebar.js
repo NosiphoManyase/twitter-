@@ -3,9 +3,11 @@ import SidebarMenuItem from "./SidebarMenuItem";
 import {HomeIcon, EllipsisHorizontalIcon} from '@heroicons/react/24/solid'
 import {HashtagIcon, BellIcon, InboxIcon, BookmarkIcon, ClipboardIcon, UserIcon, EllipsisHorizontalCircleIcon} from '@heroicons/react/24/outline'
 import { useSession, signIn, signOut } from "next-auth/react";
+import { useRouter } from "next/router";
 
 export default function Sidebar() {
     const {data: session} = useSession()
+    const router = useRouter()
   return (
     <div className="hidden sm:flex flex-col p-2 xl:items-start fixed h-full xl:ml-24">
         
@@ -16,6 +18,7 @@ export default function Sidebar() {
                 width='50'
                 height='50'
                 alt="twitter logo"
+                onClick={() => router.push('/')}
             />
         </div>
 
